@@ -30,11 +30,19 @@
 
   const audio = new Audio(SOUND_FILE);
   audio.preload = "auto";
+  audio.loop = true;   // 🔁 зацикленный
+  audio.volume = 1.0;  // 🔊 максимальная громкость
+
+  let playing = false;
 
   document.addEventListener("click", () => {
-    // Перемотка в начало чтобы можно было кликать быстро
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
+    if (!playing) {
+      // первый клик — запускаем с начала
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+      playing = true;
+    }
+    // повторные клики — звук продолжает играть по кругу, ничего не делаем
   });
 
 
@@ -47,26 +55,24 @@
 
   /*
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  let ctx;
+  let ctx, gainNode, oscNode, playing = false;
 
   document.addEventListener("click", () => {
     if (!ctx) ctx = new AudioCtx();
 
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+    if (!playing) {
+      gainNode = ctx.createGain();
+      gainNode.gain.setValueAtTime(3.0, ctx.currentTime); // очень громко
+      gainNode.connect(ctx.destination);
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(520, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.3);
-
-    gain.gain.setValueAtTime(0.8, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.3);
+      oscNode = ctx.createOscillator();
+      oscNode.type = "sawtooth";
+      oscNode.frequency.setValueAtTime(220, ctx.currentTime);
+      oscNode.connect(gainNode);
+      oscNode.start();
+      playing = true;
+    }
+    // повторные клики — звук уже играет бесконечно
   });
   */
 </script>
